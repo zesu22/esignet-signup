@@ -442,6 +442,9 @@ public class IdentityVerificationService {
     }
 
     private <T> T getResource(String url, Class<T> clazz) {
+        if (!url.contains(configServerUrl)) {
+            throw new IdentityVerifierException("invalid_configuration");
+        }
         Resource resource = resourceLoader.getResource(url);
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {

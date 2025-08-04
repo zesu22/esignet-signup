@@ -343,7 +343,7 @@ public class IdentityVerificationService {
         unsetCookie.setPath("/");
         response.addCookie(unsetCookie);
 
-        Cookie cookie = new Cookie(SignUpConstants.IDV_SLOT_ALLOTTED, value.replaceAll("[\\r\\n]", ""));
+        Cookie cookie = new Cookie(SignUpConstants.IDV_SLOT_ALLOTTED, value.replaceAll("[^a-zA-Z]", ""));
         int maxAge = identityVerifierDetail.getProcessDuration() > 0 ? identityVerifierDetail.getProcessDuration() : verifiedSlotTimeout;
         cookie.setMaxAge(slotAllottedTimeout+maxAge);
         cookie.setHttpOnly(true);
@@ -442,10 +442,13 @@ public class IdentityVerificationService {
     }
 
     private <T> T getResource(String url, Class<T> clazz) {
-        if (!url.contains(configServerUrl)) {
+        Resource resource = null;
+        if (url.contains(configServerUrl)) {
+            resource = resourceLoader.getResource(url);
+        } else {
             throw new IdentityVerifierException("invalid_configuration");
         }
-        Resource resource = resourceLoader.getResource(url);
+        
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
             String content = reader.lines().collect(Collectors.joining("\n"));

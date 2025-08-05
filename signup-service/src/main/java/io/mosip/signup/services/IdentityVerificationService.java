@@ -442,19 +442,15 @@ public class IdentityVerificationService {
     }
 
     private <T> T getResource(String url, Class<T> clazz) {
-        Resource resource = null;
         if (url.contains(configServerUrl)) {
-            resource = resourceLoader.getResource(url);
-        } else {
-            throw new IdentityVerifierException("invalid_configuration");
-        }
-        
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-            String content = reader.lines().collect(Collectors.joining("\n"));
-            return objectMapper.readValue(content, clazz);
-        } catch (IOException e) {
-            log.error("Failed to parse data: {}", url, e);
+            Resource resource = resourceLoader.getResource(url);
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+                String content = reader.lines().collect(Collectors.joining("\n"));
+                return objectMapper.readValue(content, clazz);
+            } catch (IOException e) {
+                log.error("Failed to parse data: {}", url, e);
+            }
         }
         throw new IdentityVerifierException("invalid_configuration");
     }
